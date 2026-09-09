@@ -1,0 +1,1 @@
+package com.fitconnect.booking.api; import jakarta.validation.constraints.*; public record BookingRequest(@NotNull Long userId,@NotBlank String userEmail,@NotBlank String userName,@NotNull Long classId,@NotNull @Min(1) @Max(4) Integer numberOfSpots){}

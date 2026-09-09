@@ -1,0 +1,1 @@
+package com.fitconnect.booking.config; import java.time.Clock; import org.springframework.context.annotation.*; import org.springframework.scheduling.annotation.EnableScheduling; @Configuration @EnableScheduling public class BookingConfig {@Bean Clock clock(){return Clock.systemUTC();}}

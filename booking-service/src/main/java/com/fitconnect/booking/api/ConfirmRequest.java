@@ -1,0 +1,1 @@
+package com.fitconnect.booking.api; import jakarta.validation.constraints.*; public record ConfirmRequest(@NotNull String paymentMethod,@Size(min=4,max=4) String cardLastFour,@NotBlank String transactionId){}
