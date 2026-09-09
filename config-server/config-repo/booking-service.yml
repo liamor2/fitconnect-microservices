@@ -1,0 +1,11 @@
+server.port: 8092
+spring.datasource.url: jdbc:h2:mem:bookingdb;DB_CLOSE_DELAY=-1
+spring.datasource.driver-class-name: org.h2.Driver
+spring.jpa.hibernate.ddl-auto: create-drop
+spring.jpa.open-in-view: false
+fitconnect.scheduler.expiration-delay: 300000
+fitconnect.scheduler.reminder-delay: 300000
+spring.cloud.openfeign.circuitbreaker.enabled: true
+resilience4j.circuitbreaker.instances.default.sliding-window-size: 10
+resilience4j.circuitbreaker.instances.default.minimum-number-of-calls: 3
+resilience4j.circuitbreaker.instances.default.failure-rate-threshold: 50

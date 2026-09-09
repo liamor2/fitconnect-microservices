@@ -1,0 +1,4 @@
+eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+eureka.instance.prefer-ip-address: true
+spring.jackson.time-zone: UTC
+management.endpoints.web.exposure.include: health,info

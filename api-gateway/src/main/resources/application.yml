@@ -1,0 +1,21 @@
+server.port: 8080
+spring:
+  application.name: api-gateway
+  config.import: optional:configserver:http://config-server:8888
+  cloud:
+    gateway:
+      routes:
+        - id: classes
+          uri: lb://class-service
+          predicates: [Path=/api/classes, Path=/api/classes/**]
+        - id: bookings
+          uri: lb://booking-service
+          predicates: [Path=/api/bookings, Path=/api/bookings/**]
+        - id: payments
+          uri: lb://payment-service
+          predicates: [Path=/api/payments, Path=/api/payments/**]
+        - id: notifications
+          uri: lb://notification-service
+          predicates: [Path=/api/notifications, Path=/api/notifications/**]
+eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+management.endpoints.web.exposure.include: health,info

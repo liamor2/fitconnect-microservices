@@ -1,0 +1,42 @@
+services:
+  eureka-server:
+    build: { context: ., dockerfile: eureka-server/Dockerfile }
+    ports: ["8761:8761"]
+    healthcheck: { test: ["CMD", "wget", "--spider", "-q", "http://localhost:8761/actuator/health"], interval: 10s, timeout: 5s, retries: 20 }
+    networks: [fitconnect]
+  config-server:
+    build: { context: ., dockerfile: config-server/Dockerfile }
+    ports: ["8888:8888"]
+    depends_on: { eureka-server: { condition: service_healthy } }
+    healthcheck: { test: ["CMD", "wget", "--spider", "-q", "http://localhost:8888/actuator/health"], interval: 10s, timeout: 5s, retries: 20 }
+    networks: [fitconnect]
+  api-gateway:
+    build: { context: ., dockerfile: api-gateway/Dockerfile }
+    ports: ["8080:8080"]
+    depends_on: { config-server: { condition: service_healthy } }
+    networks: [fitconnect]
+  class-service:
+    build: { context: ., dockerfile: class-service/Dockerfile }
+    ports: ["8091:8091"]
+    environment: { SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888" }
+    depends_on: { config-server: { condition: service_healthy } }
+    networks: [fitconnect]
+  booking-service:
+    build: { context: ., dockerfile: booking-service/Dockerfile }
+    ports: ["8092:8092"]
+    environment: { SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888" }
+    depends_on: { config-server: { condition: service_healthy }, class-service: { condition: service_started }, payment-service: { condition: service_started }, notification-service: { condition: service_started } }
+    networks: [fitconnect]
+  payment-service:
+    build: { context: ., dockerfile: payment-service/Dockerfile }
+    ports: ["8093:8093"]
+    environment: { SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888" }
+    depends_on: { config-server: { condition: service_healthy } }
+    networks: [fitconnect]
+  notification-service:
+    build: { context: ., dockerfile: notification-service/Dockerfile }
+    ports: ["8094:8094"]
+    environment: { SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888" }
+    depends_on: { config-server: { condition: service_healthy } }
+    networks: [fitconnect]
+networks: { fitconnect: { driver: bridge } }
