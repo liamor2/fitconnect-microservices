@@ -8,6 +8,7 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '25', cache: maven }
       - run: mvn --batch-mode clean verify
+      - run: mvn --batch-mode jacoco:report
       - run: docker compose config -q
       - uses: actions/upload-artifact@v4
         if: always()
