@@ -1,6 +1,18 @@
 # FitConnect — plateforme de réservation de cours
 
 Projet microservices du TP « Système de Gestion de Réservation et de Paiement pour une Salle de Sport ».
+Projet à but éducatif réalisé par Emmanuelle CURIANT et Liam GATTEGNO, liste des livrables attendus :
+- [x] Code source
+- [x] Fichiers de configuration dans config-repo
+- [x] Routes dans api-gateway.yml
+- [x] Clients Feign avec Circuit Breaker
+- [x] Pattern Saga complet (réservation → paiement → confirmation)
+- [x] Verrouillage optimiste dans class-service
+- [x] Scheduler pour l'expiration des paiements
+- [x] Collection Postman complète
+- [x] Tests unitaires et d'intégration
+- [x] README détaillé
+- [x] Docker Compose pour 6 services (bonus)
 
 ## Stack
 
