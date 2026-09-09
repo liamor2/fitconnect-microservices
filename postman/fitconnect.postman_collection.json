@@ -1,0 +1,11 @@
+{
+  "info": {"name": "FitConnect API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "variable": [{"key":"baseUrl","value":"http://localhost:8080"},{"key":"classId","value":"1"},{"key":"bookingId","value":"1"}],
+  "item": [
+    {"name":"Create class","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"Pilates Soir\",\"description\":\"Renforcement\",\"instructor\":\"Alex\",\"gymLocation\":\"Paris\",\"category\":\"PILATES\",\"level\":\"BEGINNER\",\"durationMinutes\":60,\"maxParticipants\":12,\"currentParticipants\":0,\"price\":25,\"dateTime\":\"2030-01-01T18:00:00\"}"},"url":{"raw":"{{baseUrl}}/api/classes","host":["{{baseUrl}}"],"path":["api","classes"]}}},
+    {"name":"List classes","request":{"method":"GET","url":{"raw":"{{baseUrl}}/api/classes?category=YOGA&level=BEGINNER&page=0&size=10","host":["{{baseUrl}}"],"path":["api","classes"],"query":[{"key":"category","value":"YOGA"},{"key":"level","value":"BEGINNER"},{"key":"page","value":"0"},{"key":"size","value":"10"}]}}},
+    {"name":"Create booking","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"},{"key":"Idempotency-Key","value":"demo-booking-1"}],"body":{"mode":"raw","raw":"{\"userId\":1,\"userEmail\":\"john@example.com\",\"userName\":\"John Doe\",\"classId\":{{classId}},\"numberOfSpots\":2}"},"url":{"raw":"{{baseUrl}}/api/bookings","host":["{{baseUrl}}"],"path":["api","bookings"]}}},
+    {"name":"Confirm payment","request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"paymentMethod\":\"CREDIT_CARD\",\"cardLastFour\":\"1234\",\"transactionId\":\"txn-demo\"}"},"url":{"raw":"{{baseUrl}}/api/bookings/{{bookingId}}/confirm","host":["{{baseUrl}}"],"path":["api","bookings", "{{bookingId}}", "confirm"]}}},
+    {"name":"Cancel booking","request":{"method":"PATCH","url":{"raw":"{{baseUrl}}/api/bookings/{{bookingId}}/cancel","host":["{{baseUrl}}"],"path":["api","bookings", "{{bookingId}}", "cancel"]}}}
+  ]
+}
