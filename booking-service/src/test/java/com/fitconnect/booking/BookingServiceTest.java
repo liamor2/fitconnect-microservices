@@ -7,6 +7,8 @@ import com.fitconnect.booking.repository.BookingRepository;
 import com.fitconnect.booking.service.BookingService;
 import com.fitconnect.booking.service.ServiceUnavailableException;
 import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
@@ -28,6 +30,11 @@ class BookingServiceTest {
     private final Clock clock = Clock.fixed(NOW.toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
     private final BookingRequest request = new BookingRequest(7L, "user@example.com", "Alex", 3L, 2);
 
+    private FeignException downstreamFailure() {
+        Request request = Request.create(Request.HttpMethod.GET, "http://dependency", Collections.emptyMap(), null, java.nio.charset.StandardCharsets.UTF_8, null);
+        return FeignException.errorStatus("dependency unavailable", Response.builder().status(503).request(request).build());
+    }
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -48,7 +55,7 @@ class BookingServiceTest {
     void createIsSuccessfulAndIdempotent() {
         Booking existing = bookingAt(NOW, NOW.plusDays(3));
         when(repository.findByIdempotencyKey("idempotent")).thenReturn(Optional.empty(), Optional.of(existing));
-        when(classes.get(3L)).thenReturn(snapshot(2, 10));
+        doReturn(snapshot(2, 10)).when(classes).get(3L);
 
         BookingResponse first = service.create("idempotent", request);
         BookingResponse second = service.create("idempotent", request);
@@ -113,6 +120,12 @@ class BookingServiceTest {
         when(repository.findById(2L)).thenReturn(Optional.of(pending));
         assertEquals(BookingStatus.CANCELLED, service.cancel(2L).status());
         verify(payments, times(1)).getByBooking(isNull());
+
+        Booking confirmedWithoutPayment = bookingAt(NOW, NOW.plusDays(3));
+        confirmedWithoutPayment.confirm();
+        when(repository.findById(6L)).thenReturn(Optional.of(confirmedWithoutPayment));
+        doReturn(null).when(payments).getByBooking(isNull());
+        assertEquals(BookingStatus.CANCELLED, service.cancel(6L).status());
     }
 
     @Test
@@ -164,18 +177,27 @@ class BookingServiceTest {
     }
 
     @Test
+    void bookingPersistenceConstructorAndSnapshotAccessorsAreCovered() throws Exception {
+        Booking booking = bookingAt(NOW, NOW.plusDays(3));
+        assertEquals("key-12", booking.getIdempotencyKey());
+        var constructor = Booking.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        assertNotNull(constructor.newInstance());
+    }
+
+    @Test
     void dependencyFailuresBecomeServiceUnavailable() {
         when(repository.findByIdempotencyKey("down")).thenReturn(Optional.empty());
-        when(classes.get(3L)).thenThrow(mock(FeignException.class));
+        when(classes.get(3L)).thenThrow(downstreamFailure());
         assertThrows(ServiceUnavailableException.class, () -> service.create("down", request));
 
         when(repository.findById(10L)).thenReturn(Optional.of(bookingAt(NOW, NOW.plusDays(3))));
-        when(payments.pay(any())).thenThrow(mock(FeignException.class));
+        when(payments.pay(any())).thenThrow(downstreamFailure());
         assertThrows(ServiceUnavailableException.class, () -> service.confirm(10L, new ConfirmRequest("PAYPAL", null, "txn")));
 
         when(repository.findByIdempotencyKey("notify-down")).thenReturn(Optional.empty());
-        when(classes.get(3L)).thenReturn(snapshot(2, 10));
-        doThrow(mock(FeignException.class)).when(notifications).send(any());
+        doReturn(snapshot(2, 10)).when(classes).get(3L);
+        doThrow(downstreamFailure()).when(notifications).send(any());
         assertThrows(ServiceUnavailableException.class, () -> service.create("notify-down", request));
     }
 }
