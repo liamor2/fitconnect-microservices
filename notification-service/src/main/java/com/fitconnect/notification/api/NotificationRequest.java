@@ -1,0 +1,1 @@
+package com.fitconnect.notification.api; import com.fitconnect.notification.domain.NotificationType; import jakarta.validation.constraints.*; public record NotificationRequest(@NotNull Long userId,@NotBlank String email,@NotNull NotificationType type,@NotBlank String subject,@NotBlank String content){}
